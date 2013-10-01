@@ -35,89 +35,91 @@ for(iter in 1:m){
 }
 #################################################################################
 #################################################################################
-ecr.iterative.1<-function(z,K,opt_init){
-
-if(K<max(z)){stop("K should be at least equal to max(z)")}
-m<-dim(z)[1]
-k<-K
-#library(lpSolve);				# contains the routine lp.assign for the solution of the assignment problem
-st <- 1:k;							# the set {1,...,k}
-perm <- array(data = NA, dim=c(m,K));	# the permutation of st that will be used to reorder the parameter values at each iteration
-cost.matrix <- matrix(numeric(k*k),nrow=k,ncol=k); # (k times k) cost matrix of the assignment problem
-n<-dim(z)[2]
-s <- 1:n
-#ptm<-proc.time()
-
-if(missing(opt_init)) { # 'missing()' is used to test whether a value was specified as an argument
-	#initial permutations: identity
-#	print(paste("Initializing using the identity permutation."))
-	for (j in 1:K){
-		perm[,j]<-j
+ecr.iterative.1<-function (z, K, opt_init) {
+    if (K < max(z)) {
+        stop("K should be at least equal to max(z)")
+    }
+    m <- dim(z)[1]
+    k <- K
+    st <- 1:k
+    perm <- array(data = NA, dim = c(m, K))
+    cost.matrix <- matrix(numeric(k * k), nrow = k, ncol = k)
+    n <- dim(z)[2]
+    s <- 1:n
+    if (missing(opt_init)) {
+        for (j in 1:K) {
+            perm[, j] <- j
+        }
+    }
+    else {
+        perm <- opt_init
+    }
+    permz <- z
+    for(iter in 1:m){
+	permz[iter, ] <- perm[iter, ][z[iter, ]]
+    }	
+    zpivot <- numeric(n)
+    criterion <- 99
+    threshold <- 10^(-6)
+    t <- 1
+    zpivot <- apply(permz, 2, function(y) order(table(y), decreasing = T)[1])
+    cf <- 0
+    for (iter in 1:m) {
+        alloc <- z[iter, ]
+        for (i in 1:k) {
+            so <- zpivot[s[alloc == i]]
+            l <- length(alloc[alloc == i])
+            for (j in 1:k) cost.matrix[i, j] <- l - length(so[so == 
+                j])
+        }
+        matr <- lp.assign(cost.matrix)$solution
+        for (i in 1:k) {
+            perm[iter, i] <- st[matr[, i] > 0]
+        }
+        cf <- cf + sum(cost.matrix * matr)
+        permz[iter, ] <- perm[iter, ][z[iter, ]]
+    }
+    previous <- cf
+    #print(paste("t = ",t,"cost function = ", cf))
+    while (criterion > threshold) {
+	previousperm<-perm
+  #   while (t < 4) {
+        t <- t + 1
+        zpivot <- apply(permz, 2, function(y) order(table(y), 
+            decreasing = T)[1])
+        cf <- 0
+        for (iter in 1:m) {
+            alloc <- z[iter, ]
+            for (i in 1:k) {
+                so <- zpivot[s[alloc == i]]
+                l <- length(alloc[alloc == i])
+                for (j in 1:k) cost.matrix[i, j] <- l - length(so[so == 
+                  j])
+            }
+            matr <- lp.assign(cost.matrix)$solution
+            for (i in 1:k) {
+                perm[iter, i] <- st[matr[, i] > 0]
+            }
+            cf <- cf + sum(cost.matrix * matr)
+            permz[iter, ] <- perm[iter, ][z[iter, ]]
+        }
+        current <- cf
+        criterion <- previous - current
+        previous <- cf
+	if (criterion<0){
+		perm<-previousperm
 	}
-}else{
-#    print(paste("User-specified initialization."))
-    perm<-opt_init
-}  
-
-permz<-z
-#library(modeest)
-zpivot<-numeric(n)
-
-criterion<-99
-threshold<-10**(-6)
-t<-1
-#estimating pivot
-#for(i in 1:n){zpivot[i]<-mlv(permz[,i], method = "mfv")$M}
-zpivot<-apply(permz,2,function(y)order(table(y),decreasing = T)[1])
-
-cf<-0
-for(iter in 1:m){
-	alloc <- z[iter,]
-	for(i in 1:k){
-		so <- zpivot[s[alloc==i]];	# finding the indices of zpivot that correspond to z[,iter]==i
-		l <- length(alloc[alloc==i]);	# the length of the vector above
-		for(j in 1:k)cost.matrix[i,j] <- l-length(so[so==j])
-	}
-	matr <- lp.assign(cost.matrix)$solution ;	# solution: matr[j,i] = 1 <=> index i assigned to index j
-	for(i in 1:k){perm[iter,i] <- st[matr[,i]>0]}	# the optimal permutation for the current iteration
-	cf<-cf + sum(cost.matrix*matr)
-	permz[iter,]<-perm[iter,][z[iter,]]
+        #print(paste("t = ",t,"cost function = ", cf))
+    }
+    results <- list(perm, t)
+    names(results) <- c("permutations", "iterations")
+    return(results)
 }
-previous<-cf
-#print(paste("iteration 1, cost function =",cf))
-
-while(criterion>threshold){
-	t<-t + 1
-	#estimating pivot
-	#for(i in 1:n){zpivot[i]<-mlv(permz[,i], method = "mfv")$M}
-	zpivot<-apply(permz,2,function(y)order(table(y),decreasing = T)[1])
-	cf<-0
-	for(iter in 1:m){
-		alloc <- z[iter,]
-		for(i in 1:k){
-			so <- zpivot[s[alloc==i]];	# finding the indices of zpivot that correspond to z[,iter]==i
-			l <- length(alloc[alloc==i]);	# the length of the vector above
-			for(j in 1:k)cost.matrix[i,j] <- l-length(so[so==j])
-		}
-		matr <- lp.assign(cost.matrix)$solution ;	# solution: matr[j,i] = 1 <=> index i assigned to index j
-		for(i in 1:k){perm[iter,i] <- st[matr[,i]>0]}	# the optimal permutation for the current iteration
-		cf<-cf + sum(cost.matrix*matr)
-		permz[iter,]<-perm[iter,][z[iter,]]
-	}
-	current<-cf
-	criterion<-abs(previous - current)
-	previous<-cf
-#	print(paste("iteration", t, "criterion =",criterion))
 
 
-}
-#	time<-proc.time() - ptm
-#	print(paste("Iterative ECR algorithm 1 converged at", t,"iterations"))
-#	print(paste("Iterative ECR algorithm 1 time:", as.numeric(time[3]),"seconds."))
-	results<-list(perm,t)
-	names(results)<-c("permutations","iterations")
-	return(results)
-}
+
+
+
 
 
 
@@ -447,6 +449,16 @@ for(iter in 1:m){
 }
 
 
+############################################################################
+############################################################################
+############################################################################
+###########################################################################
+
+
+
+
+
+############################################################################
 
 
 permute.mcmc<-function(mcmc,permutations){
@@ -470,230 +482,352 @@ mcmc.permuted<-mcmc
 
 
 
-label.switching<-function(method,zpivot,z,K,prapivot,p,complete,mcmc, sjwinit, data){
+label.switching<-function(method, zpivot, z, K, prapivot, p, complete, mcmc, sjwinit, data){
+    L <- length(method)
+    for (l in 1:L) {
+        if ((method[l] %in% c("ECR", "ECR-ITERATIVE-1", "ECR-ITERATIVE-2", 
+            "STEPHENS", "SJW", "PRA")) == FALSE) {
+            stop(paste("method:", method[l], "is not recognised"))
+        }
+    }
+    if (missing(z) == FALSE) {
+        m <- dim(z)[1]
+    }
+    else {
+        if (missing(mcmc) == FALSE) {
+            m <- dim(mcmc)[1]
+        }
+        else {
+            if (missing(p) == FALSE) {
+                m <- dim(p)[1]
+            }
+            else {
+                stop(paste("At least one of z, mcmc, or p should be provided"))
+            }
+        }
+    }
+    fr <- 1
+    dimname <- L
+    if ((is.array(zpivot) == TRUE) && (("ECR" %in% method) == 
+        TRUE)) {
+        fr <- dim(zpivot)[1]
+        dimname <- L + fr - 1
+    }
+    if ("ECR" %in% method) {
+        ind <- which(method == "ECR")
+        if (length(ind) > 1) {
+            stop(paste("ECR appearing more than 1 times"))
+        }
+        nam <- numeric(dimname)
+        if (ind == 1) {
+        }
+        else {
+            for (i in 1:(ind - 1)) {
+                nam[i] <- method[i]
+            }
+        }
+        for (i in 1:fr) {
+            nam[ind + i - 1] <- paste("ECR", i, sep = "-")
+        }
+        if ((ind + fr) <= dimname) {
+            for (i in (ind + fr):(dimname)) {
+                nam[i] <- method[i - fr + 1]
+            }
+        }
+        if (fr == 1) {
+            nam[ind] <- "ECR"
+        }
+    }
+    else {
+        nam <- method
+    }
+    permutations <- vector("list", length = dimname)
+    names(permutations) <- nam
+    timings <- numeric(dimname)
+    names(timings) <- nam
+    f <- 0
+    t <- 1
+    cat(paste("Method                        Time (sec)\n"))
+    for (l in 1:L) {
+        cat(paste("   ", method[l]))
+        if (method[l] == "ECR") {
+            if (is.array(zpivot) == TRUE) {
+                while (f < dim(zpivot)[1]) {
+                  f <- f + 1
+                  if (f == 1) {
+                    cat(paste(" (using pivot", f, "of", dim(zpivot)[1]), 
+                      ")", sep = "")
+                  }
+                  else {
+                    cat(paste("        (using pivot", f, "of", 
+                      dim(zpivot)[1]), ")", sep = "")
+                  }
+                  if (dim(zpivot)[2] != dim(z)[2]) {
+                    stop(paste("length(zpivot) and number of columns of z are not equal"))
+                  }
+                  if (K < max(z)) {
+                    stop(paste("K should be at least equal to", 
+                      max(z)))
+                  }
+                  tpm <- proc.time()
+                  permutations[[t]] <- ecr(zpivot[f, ], z, K)$permutations
+                  time <- proc.time() - tpm
+                  time <- as.numeric(time[3])
+                  cat(paste("   ", time, "\n"))
+                  timings[t] <- time
+                  t <- t + 1
+                }
+            }
+            else {
+                if (missing(zpivot)) {
+                  stop(paste("zpivot is missing"))
+                }
+                else {
+                  if (length(zpivot) != dim(z)[2]) {
+                    stop(paste("length(zpivot) and number of columns of z are not equal"))
+                  }
+                  if (K < max(z)) {
+                    stop(paste("K should be at least equal to", 
+                      max(z)))
+                  }
+                  tpm <- proc.time()
+                  permutations[[t]] <- ecr(zpivot, z, K)$permutations
+                  time <- proc.time() - tpm
+                  time <- as.numeric(time[3])
+                  cat(paste("                        ", time, 
+                    "\n"))
+                  timings[t] <- time
+                  t <- t + 1
+                }
+            }
+        }
+        if (method[l] == "ECR-ITERATIVE-1") {
+            if (K < max(z)) {
+                stop(paste("K should be at least equal to", max(z)))
+            }
+            tpm <- proc.time()
+            hold <- ecr.iterative.1(z, K)
+            permutations[[t]] <- hold$permutations
+            time <- proc.time() - tpm
+            time <- as.numeric(time[3])
+            cat(paste("            ", time, "  (converged at", 
+                hold$iterations, "iterations)\n"))
+            timings[t] <- time
+            t <- t + 1
+        }
+        if (method[l] == "ECR-ITERATIVE-2") {
+            if (missing(z)) {
+                stop(paste("z is missing"))
+            }
+            if (missing(p)) {
+                stop(paste("p is missing"))
+            }
+            if (K < max(z)) {
+                stop(paste("K should be at least equal to", max(z)))
+            }
+            tpm <- proc.time()
+            hold <- ecr.iterative.2(z, K, p)
+            permutations[[t]] <- hold$permutations
+            time <- proc.time() - tpm
+            time <- as.numeric(time[3])
+            cat(paste("            ", time, "  (converged at", 
+                hold$iterations, "iterations)\n"))
+            timings[t] <- time
+            t <- t + 1
+        }
+        if (method[l] == "PRA") {
+            tpm <- proc.time()
+            permutations[[t]] <- pra(mcmc, prapivot)$permutations
+            time <- proc.time() - tpm
+            time <- as.numeric(time[3])
+            cat(paste("                        ", time, "\n"))
+            timings[t] <- time
+            t <- t + 1
+        }
+        if (method[l] == "STEPHENS") {
+            if (missing(p)) {
+                stop(paste("p is missing"))
+            }
+            tpm <- proc.time()
+            hold <- stephens(p)
+            permutations[[t]] <- hold$permutations
+            time <- proc.time() - tpm
+            time <- as.numeric(time[3])
+            cat(paste("                   ", time, "  (converged at", 
+                hold$iterations, "iterations)\n"))
+            timings[t] <- time
+            t <- t + 1
+        }
+        if (method[l] == "SJW") {
+            if (missing(mcmc)) {
+                stop(paste("mcmc is missing"))
+            }
+            if (missing(z)) {
+                stop(paste("z is missing"))
+            }
+            if (missing(complete)) {
+                stop(paste("Complete log-likelihood function is missing"))
+            }
+            if (missing(data)) {
+                stop(paste("Data is missing"))
+            }
+            if (missing(sjwinit)) {
+                sjwinit = 0
+            }
+            tpm <- proc.time()
+            hold <- sjw(mcmc, z, complete, x = data, sjwinit)
+            permutations[[t]] <- hold$permutations
+            time <- proc.time() - tpm
+            time <- as.numeric(time[3])
+            cat(paste("                        ", time, "  (converged at", 
+                hold$iterations, "iterations)\n"))
+            timings[t] <- time
+            t <- t + 1
+        }
+    }
+    cat(paste("\n\n"))
 
-L<-length(method)
-
-for (l in 1:L){
-if((method[l] %in% c("ECR","ECR-ITERATIVE-1","ECR-ITERATIVE-2","STEPHENS","SJW","PRA"))==FALSE){
-stop(paste("method:",method[l],"is not recognised"))
-}
-}
-
-if(missing(z)==FALSE){m<-dim(z)[1]}else{
-if(missing(mcmc)==FALSE){m<-dim(mcmc)[1]}else{
-if(missing(p)==FALSE){m<-dim(p)[1]}else{
-stop(paste("At least one of z, mcmc, or p should be provided"))
-}
-}
-}
-fr<-1
-dimname<-L
-if((is.array(zpivot)==TRUE)&&(("ECR"%in%method)==TRUE)){
-fr<-dim(zpivot)[1]
-dimname<-L+fr-1
-}
-
-if("ECR"%in%method){
-ind<-which(method=="ECR")
-if(length(ind)>1){stop(paste("ECR appearing more than 1 times"))}
-nam<-numeric(dimname)
-if(ind==1){}else{
-for(i in 1:(ind-1)){
-nam[i]<-method[i]
-}}
-for(i in 1:fr){
-nam[ind + i - 1]<-paste("ECR",i,sep="-")
-}
-if((ind+fr)<=dimname){
-for(i in (ind+fr):(dimname)){
-nam[i]<-method[i-fr+1]
-}}
-if(fr==1){nam[ind]<-"ECR"}
-}else{nam<-method}
-permutations<-vector("list",length = dimname)
-names(permutations)<-nam
-
-timings<-numeric(dimname)
-names(timings)<-nam
+    if (missing(z) == FALSE){
+        n <- dim(z)[2]
+	best.clusterings <- array(data = NA, dim = c(dimname, n))
+        st <- 1:K
+        m <- dim(z)[1]
+        perm <- numeric(K)
+        z1 <- z2 <- numeric(n)
+        temp <- z
+        for (i in 1:m) {
+            temp[i, ] <- permutations[[1]][i, ][z[i, ]]
+        }
+        z1 <- apply(temp, 2, function(y) order(table(y), decreasing = T)[1])
+        zpivot <- z1
+        best.clusterings[1, ] <- zpivot
+    }
 
 
-f<-0
-t<-1
-cat(paste("Method                        Time (sec)\n"))
-for(l in 1:L){
-cat(paste("   ",method[l]))
-if(method[l] == "ECR"){
-	if(is.array(zpivot)==TRUE){
-		while(f<dim(zpivot)[1]){
-			f<-f+1
-			if(f==1){
-			cat(paste(" (using pivot",f, "of",dim(zpivot)[1]),")",sep="")}else{
-			cat(paste("        (using pivot",f, "of",dim(zpivot)[1]),")",sep="")
-			}
-			if(dim(zpivot)[2]!=dim(z)[2]){stop(paste("length(zpivot) and number of columns of z are not equal"))}
-			if(K<max(z)){stop(paste("K should be at least equal to",max(z)))}
-			tpm<-proc.time()
-			permutations[[t]]<-ecr(zpivot[f,],z,K)$permutations	
-			time<-proc.time() - tpm
-			time<-as.numeric(time[3])
-			cat(paste("   ",time,"\n"))
-			timings[t]<-time
-		t<-t+1
-		}
-	}else{
-	#print(paste("Fitting",method[l],"method"))
-	if(missing(zpivot)){stop(paste("zpivot is missing"))}else{	
-		if(length(zpivot)!=dim(z)[2]){stop(paste("length(zpivot) and number of columns of z are not equal"))}
-		if(K<max(z)){stop(paste("K should be at least equal to",max(z)))}
-		tpm<-proc.time()
-		permutations[[t]]<-ecr(zpivot,z,K)$permutations
-		time<-proc.time() - tpm
-		time<-as.numeric(time[3])
-		cat(paste("                        ", time,"\n"))
-		timings[t]<-time
-		t<-t+1
-	}}  
+
+    if ((dimname > 1) && (missing(z) == FALSE)) {
+        cat(paste("Reordering outputs to maximize their correlation with method:", 
+            method[1], "..."))
+        for (l in 2:dimname) {
+            for (i in 1:m) {
+                temp[i, ] <- permutations[[l]][i, ][z[i, ]]
+            }
+            z2 <- apply(temp, 2, function(y) order(table(y), 
+                decreasing = T)[1])
+            st <- 1:K
+            k <- K
+            cost.matrix <- matrix(numeric(k * k), nrow = k, ncol = k)
+            s <- 1:n
+            alloc <- z2
+            for (i in 1:K) {
+                so <- zpivot[s[alloc == i]]
+                l2 <- length(alloc[alloc == i])
+                for (j in 1:k) cost.matrix[i, j] <- l2 - length(so[so == 
+                  j])
+            }
+            matr <- lp.assign(cost.matrix)$solution
+            for (i in 1:k) {
+                perm[i] <- st[matr[, i] > 0]
+            }
+            for (i in 1:m) {
+                permutations[[l]][i, ] <- permutations[[l]][i, 
+                  ][perm]
+		temp[i, ] <- permutations[[l]][i, ][z[i, ]]
+            }
+            best.clusterings[l, ] <- apply(temp, 2, function(y) order(table(y), 
+                decreasing = T)[1])
+
+        }
+        rownames(best.clusterings) <- nam
+        similarity.matrix <- array(data = 0, dim = c(dimname, 
+            dimname))
+        colnames(similarity.matrix) <- nam
+        rownames(similarity.matrix) <- nam
+        for (i in 1:dimname) {
+            for (j in 1:i) {
+                similarity.matrix[i, j] <- length(which(t(best.clusterings)[, 
+                  i] == t(best.clusterings)[, j]))
+            }
+        }
+        similarity.matrix = (similarity.matrix + t(similarity.matrix))/n
+        diag(similarity.matrix) <- rep(1, dimname)
+    }
+    cat(paste(" done!\n"))
+    cat(paste("Retrieve the", dimname, "permutation arrays by typing:\n"))
+    for (i in 1:dimname) {
+        cat(paste("   [...]$permutations$\"", nam[i], "\"", sep = "", 
+            "\n"))
+    }
+    cat(paste("Retrieve the", dimname, "best clusterings by typing: [...]$clusters\n"))
+    cat(paste("Retrieve the", dimname, "CPU times by typing: [...]$timings\n"))
+    cat(paste("Retrieve the", dimname, "X", dimname, "similarity matrix: [...]$similarity\n"))
+    results <- list(permutations, best.clusterings, timings, 
+        similarity.matrix)
+    names(results) <- c("permutations", "clusters", "timings", 
+        "similarity")
+    return(results)
 }
 
-if(method[l] == "ECR-ITERATIVE-1"){
-	if(K<max(z)){stop(paste("K should be at least equal to",max(z)))}
-	tpm<-proc.time()
-	hold<-ecr.iterative.1(z,K)
-	permutations[[t]]<-hold$permutations
-	time<-proc.time() - tpm
-	time<-as.numeric(time[3])
-	cat(paste("            ", time,"  (converged at", hold$iterations,"iterations)\n"))
-	timings[t]<-time
+
+compare.clust<-function(pivot.clust,perms,z,K){
+	if(is.list(perms)==FALSE){rrr<-list(perms);names(rrr)<-deparse(substitute(perms));perms<-rrr}
+	if(length(pivot.clust)!=dim(z)[2]){stop("pivot.clust should have the same length with dim(z)[2]")}
+	outdim<-length(perms) + 1
+	n<-length(pivot.clust)
+        best.clusterings <- array(data = NA, dim = c(outdim - 1,n))
+        st <- 1:K
+        m <- dim(z)[1]
+	temp <- z
+        perm <- numeric(K)
+        z1 <- z2 <- numeric(n)
+        zpivot <- pivot.clust
+	permutations<-vector("list",length=outdim - 1)
+	for(l in 1:(outdim - 1)){permutations[[l]]<-perms[[l]]}
+        for (l in 1:(outdim - 1)) {
+            for (i in 1:m) {
+                temp[i, ] <- permutations[[l]][i, ][z[i, ]]
+            }
+            z2 <- apply(temp, 2, function(y) order(table(y), 
+                decreasing = T)[1])
+            st <- 1:K
+            k <- K
+            cost.matrix <- matrix(numeric(k * k), nrow = k, ncol = k)
+            s <- 1:n
+            alloc <- z2
+            for (i in 1:K) {
+                so <- zpivot[s[alloc == i]]
+                l2 <- length(alloc[alloc == i])
+                for (j in 1:k) cost.matrix[i, j] <- l2 - length(so[so == j])
+            }
+            matr <- lp.assign(cost.matrix)$solution
+            for (i in 1:k) {perm[i] <- st[matr[, i] > 0]}
+            for (i in 1:m) {
+                permutations[[l]][i, ] <- permutations[[l]][i, ][perm]
+		temp[i, ] <- permutations[[l]][i, ][z[i, ]]
+            }
+	    best.clusterings[l, ] <- apply(temp, 2, function(y) order(table(y), decreasing = T)[1])
+
+        }
+        similarity.matrix <- array(data = 0, dim = c(outdim,outdim))
+        for (i in 1:(outdim - 1)) {
+            for (j in 1:i) {
+                similarity.matrix[i, j] <- length(which(t(best.clusterings)[,i] == t(best.clusterings)[, j]))
+            }
+        }
+	i<-outdim
+        for (j in 1:(outdim - 1)) {
+              similarity.matrix[i, j] <- length(which(zpivot == t(best.clusterings)[, j]))}
 	
-	t<-t+1
-}
-
-if(method[l] == "ECR-ITERATIVE-2"){
-	if(missing(z)){stop(paste("z is missing"))}
-	if(missing(p)){stop(paste("p is missing"))}
-	if(K<max(z)){stop(paste("K should be at least equal to",max(z)))}
-	tpm<-proc.time()
-	hold<-ecr.iterative.2(z,K,p)
-	permutations[[t]]<-hold$permutations
-	time<-proc.time() - tpm
-	time<-as.numeric(time[3])
-	cat(paste("            ", time,"  (converged at", hold$iterations,"iterations)\n"))
-	timings[t]<-time
-
-	t<-t+1
+        similarity.matrix = (similarity.matrix + t(similarity.matrix))/n
+        diag(similarity.matrix) <- rep(1, outdim)
+	rownames(similarity.matrix)<-c(names(perms),deparse(substitute(pivot.clust)))
+	colnames(similarity.matrix)<-c(names(perms),deparse(substitute(pivot.clust)))
+	results<-list(similarity.matrix,best.clusterings)
+	names(results)<-c("similarity","clusters")
+	return(results)
+   
 }
 
 
 
-if(method[l] == "PRA"){
-	tpm<-proc.time()
-	permutations[[t]]<-pra(mcmc,prapivot)$permutations	
-	time<-proc.time() - tpm
-	time<-as.numeric(time[3])
-	cat(paste("                        ", time,"\n"))
-	timings[t]<-time
-
-t<-t+1
-}
-
-
-if(method[l] == "STEPHENS"){
-	if(missing(p)){stop(paste("p is missing"))}
-	tpm<-proc.time()
-	hold<-stephens(p)
-	permutations[[t]]<-hold$permutations
-	time<-proc.time() - tpm
-	time<-as.numeric(time[3])
-	cat(paste("                   ", time,"  (converged at", hold$iterations,"iterations)\n"))
-	timings[t]<-time
-
-	t<-t+1
-}
-
-if(method[l] == "SJW"){
-	if(missing(mcmc)){stop(paste("mcmc is missing"))}
-	if(missing(z)){stop(paste("z is missing"))}
-	if(missing(complete)){stop(paste("Complete log-likelihood function is missing"))}
-	if(missing(data)){stop(paste("Data is missing"))}
-	if(missing(sjwinit)){sjwinit = 0}
-	tpm<-proc.time()
-	hold<-sjw(mcmc,z,complete,x=data,sjwinit)
-	permutations[[t]]<-hold$permutations
-	time<-proc.time() - tpm
-	time<-as.numeric(time[3])
-	cat(paste("                        ", time,"  (converged at", hold$iterations,"iterations)\n"))
-	timings[t]<-time
-
-	t<-t+1
-}
-#end method
-}
-####################################################################################
-cat(paste("\n\n"))
-if((dimname>1)&&(missing(z)==FALSE)){
-cat(paste("Reordering outputs to maximize their correlation with method:",method[1],"..."))
-
-n<-dim(z)[2]
-#sim.mat<-array(data = NA, dim =c(dimname,dimname))
-best.clusterings<-array(data = NA, dim =c(dimname,n))
-
-st<-1:K
-m<-dim(z)[1]
-perm<-numeric(K)
-z1<-z2<-numeric(n)
-temp<-z
-for(i in 1:m){temp[i,]<-permutations[[1]][i,][z[i,]]}
-z1<-apply(temp,2,function(y)order(table(y),decreasing = T)[1])
-zpivot<-z1
-best.clusterings[1,]<-zpivot
-for (l in 2:dimname){
-for(i in 1:m){
-temp[i,]<-permutations[[l]][i,][z[i,]]}
-z2<-apply(temp,2,function(y)order(table(y),decreasing = T)[1])
-st <- 1:K;
-k<-K
-cost.matrix <- matrix(numeric(k*k),nrow=k,ncol=k);
-s <- 1:n
-alloc <- z2
-for(i in 1:K){	so <- zpivot[s[alloc==i]];
-		l2 <- length(alloc[alloc==i]);
-		for(j in 1:k) cost.matrix[i,j] <- l2-length(so[so==j])}
-matr <- lp.assign(cost.matrix)$solution ;	# solution: matr[j,i] = 1 <=> index i assigned to index j
-for(i in 1:k){perm[i] <- st[matr[,i]>0]}	# the optimal permutation for the current iteration
-for(i in 1:m){permutations[[l]][i,]<-permutations[[l]][i,][perm]}
-perm<-order(perm)
-best.clusterings[l,]<-perm[z2]
-}
-rownames(best.clusterings)<-nam
-similarity.matrix<-array(data = 0, dim =c(dimname,dimname))
-colnames(similarity.matrix)<-nam
-rownames(similarity.matrix)<-nam
-for(i in 1:dimname){
-for(j in 1:i){
-similarity.matrix[i,j]<-length(which(t(best.clusterings)[,i]==t(best.clusterings)[,j]))
-}
-}
-similarity.matrix = (similarity.matrix +t(similarity.matrix))/n
-diag(similarity.matrix)<-rep(1,dimname)
-
-}
-###############################################################################
-
-
-
-cat(paste(" done!\n"))
-cat(paste("Retrieve the",dimname,"permutation arrays by typing:\n"))
-for(i in 1:dimname){
-cat(paste("   [...]$permutations$\"",nam[i],"\"",sep="","\n"))
-}
-cat(paste("Retrieve the",dimname,"best clusterings by typing: [...]$best.clusterings\n"))
-cat(paste("Retrieve the",dimname,"CPU times by typing: [...]$timings\n"))
-cat(paste("Retrieve the",dimname,"X",dimname,"similarity matrix: [...]$similarity\n"))
-results<-list(permutations,best.clusterings,timings,similarity.matrix)
-names(results)<-c("permutations","best.clusterings","timings","similarity")
-return(results)
-
-
-}
 

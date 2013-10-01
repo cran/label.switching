@@ -67,7 +67,7 @@ The methods \code{\link{sjw}} and \code{\link{pra}} are not suggested for large 
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 \item{permutations }{an \eqn{m\times K} array of permutations per method.}
-\item{best.clusterings }{an \eqn{n} dimensional vector of best clustering of the the observations for each method.}
+\item{clusters }{an \eqn{n} dimensional vector of best clustering of the the observations for each method.}
 \item{timings }{CPU time needed for each relabelling method.}
 \item{similarity }{correlation matrix between the label switching solving methods in terms of their matching best-clustering allocations.}
 }
