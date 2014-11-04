@@ -2,22 +2,22 @@
 \alias{label.switching}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
 Main calling function
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This is the main function of the package. It is used to reorder a simulated MCMC sample of the parameters of a mixture (or more general a hidden Markov model) according to six label switching solving methods: ECR algorithm (default version), ECR algorithm (two iterative versions), PRA algorithm, Stephens' algorithm and a probabilistic relabelling algorithm. The input depends on the type of the label switching method. The output contains a list with the permutation returned by each method, the corresponding single best clusterings and the CPU time demanded for each method. In what follows: \eqn{m} denotes the number of MCMC iterations, \eqn{n} denotes the sample size of the observed data, \eqn{K} denotes the number of mixture components and \eqn{J} the number of different types of parameters of the model.
+This is the main function of the package. It is used to reorder a simulated MCMC sample of the parameters of a mixture (or more general a hidden Markov model) according to eight label switching solving methods: ECR algorithm (default version), ECR algorithm (two iterative versions), PRA algorithm, Stephens' algorithm, Artificial Identifiability Constraint (AIC), Data-Based relabelling and a probabilistic relabelling algorithm (SJW). The input depends on the type of the label switching method. The output contains a list with the permutation returned by each method, the corresponding single best clusterings and the CPU time demanded for each method. In what follows: \eqn{m} denotes the number of MCMC iterations, \eqn{n} denotes the sample size of the observed data, \eqn{K} denotes the number of mixture components and \eqn{J} the number of different types of parameters of the model.
 }
 \usage{
 label.switching(method, zpivot, z, K, prapivot, p, complete, 
-			mcmc, sjwinit, data)
+			mcmc, sjwinit, data, constraint, 
+			groundTruth, thrECR, thrSTE, thrSJW, 
+			maxECR, maxSTE, maxSJW, userPerm)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{method}{
 %%     ~~Describe \code{method} here~~
-any non-empty subset of c("ECR","ECR-ITERATIVE-1","PRA","ECR-ITERATIVE-2","STEPHENS","SJW") indicating the desired label-switching solving method.
+any non-empty subset of c("ECR","ECR-ITERATIVE-1","PRA","ECR-ITERATIVE-2","STEPHENS","SJW","AIC","DATA-BASED") indicating the desired label-switching solving method. Also available is the option "USER-PERM" which corresponds to a user-defined set of permutations \code{userPerm}.
 }
   \item{zpivot}{
 %%     ~~Describe \code{zpivot} here~~
@@ -53,36 +53,55 @@ An index pointing at the MCMC iteration whose parameters will initialize the \co
 }
   \item{data}{
 %%     ~~Describe \code{data} here~~
-\eqn{n}-dimensional data vector/array. Needed by the \code{\link{sjw}} algorithm.
+\eqn{n}-dimensional data vector/array. Needed by the \code{\link{sjw}} and \code{\link{dataBased}} algorithms.
 }
+  \item{constraint}{
+An (optional) integer between 1 and J corresponding to the parameter that will be used to apply the Identifiabiality Constraint. In this casethe mcmc output is reordered according to the constraint \eqn{mcmc[i,1,constraint] < \ldots < mcmc[i,K,constraint]}. If \code{constraint = "ALL"}, all \eqn{J} Identifiability Constraints are applied. Default value: 1.
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-The methods \code{\link{sjw}} and \code{\link{pra}} are not suggested for large number of components. 
+  \item{groundTruth}{
+Optional integer vector of \eqn{n} allocations, which are considered as the 'ground truth' allocations of the \eqn{n} observations among the \eqn{K} mixture components. The output of all methods will be relabelled in a way that the resulting single best clusterings maximize their similarity with the ground truth. This option is very useful in simulation studies or in any other case that the cluster labels are known in order to perform comparisons between methods. 
+}
+  \item{thrECR}{
+An (optional) positive number controlling the convergence criterion for \code{ecr.iterative.1} and \code{ecr.iterative.2}. Default value: 1e-6.
+}
+  \item{thrSTE}{
+An (optional) positive number controlling the convergence criterion for \code{stephens}. Default value: 1e-6.
+}
+  \item{thrSJW}{
+An (optional) positive number controlling the convergence criterion for \code{sjw}. Default value: 1e-6.
+}
+  \item{maxECR}{
+An (optional) integer controlling the max number of iterations for \code{ecr.iterative.1} and \code{ecr.iterative.2}. Default value: 100.
+}
+  \item{maxSTE}{
+An (optional) integer controlling the max number of iterations for \code{stephens}. Default value: 100.
+}
+  \item{maxSJW}{
+An (optional) integer controlling the max number of iterations for \code{sjw}. Default value: 100.
+}
+  \item{userPerm}{
+An (optional) list with user-defined permutations. It is required only if "USER-PERM" has been chosen in \code{method}. In this case, \code{userPerm[[i]]} is an \eqn{m\times K} array of permutations for all \eqn{i = 1,\ldots,S}, where \eqn{S} denotes the number of permutation arrays. This is useful in case that the user wants to compare his/hers own relabelling method with the available ones. 
+}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{an \eqn{m\times K} array of permutations per method.}
 \item{clusters }{an \eqn{n} dimensional vector of best clustering of the the observations for each method.}
 \item{timings }{CPU time needed for each relabelling method.}
 \item{similarity }{correlation matrix between the label switching solving methods in terms of their matching best-clustering allocations.}
 }
 \author{
-%%  ~~who you are~~
 Panagiotis Papastamoulis
+}
+\note{
+If the ground truth is not given, all methods are reordered using the estimated single best clustering of the first provided method. The methods \code{\link{sjw}} and \code{\link{pra}} are not suggested for large number of components. Also note that \code{\link{sjw}} might be quite slow even for small number of components. In this case try adjusting \code{thrSJW} or \code{maxSJW} to smaller values the default ones.
 }
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{ecr}}, \code{\link{ecr.iterative.1}}, \code{\link{ecr.iterative.2}}, \code{\link{stephens}}, \code{\link{pra}}, \code{\link{sjw}} 
+\code{\link{ecr}}, \code{\link{ecr.iterative.1}}, \code{\link{ecr.iterative.2}}, \code{\link{stephens}}, \code{\link{pra}}, \code{\link{sjw}}, \code{\link{dataBased}}, \code{\link{aic}}
 }
 \examples{
 # We will apply four methods:
-# ECR, ECR-ITERATIVE-1, PRA and STEPHENS.
+# ECR, ECR-ITERATIVE-1, PRA, AIC, STEPHENS and DATA-BASED.
 # default ECR will use two different pivots.
 
 #load a toy example: MCMC output consists of the random beta model
@@ -102,19 +121,20 @@ mcmc.pars<-data_list$"mcmc.pars"
 z<-data_list$"z"
 K<-data_list$"K"
 p<-data_list$"p"
+x<-data_list$"x"
 mapindex<-data_list$"mapindex"
 mapindex.non<-data_list$"mapindex.non"
 # The PRA method will use as pivot the iteration that corresponds to
 # the non-complete MAP estimate (mapindex). 
 
-#Apply the four methods by typing:
+#Apply the six methods by typing:
 
-ls<-label.switching(method=c("ECR","ECR-ITERATIVE-1","PRA","STEPHENS"),
-zpivot=z[c(mapindex,mapindex.non),],z = z,K = K,
+ls<-label.switching(method=c("ECR","ECR-ITERATIVE-1","PRA","STEPHENS","AIC","DATA-BASED"),
+zpivot=z[c(mapindex,mapindex.non),],z = z,K = K, data = x,
 prapivot = mcmc.pars[mapindex,,],p=p,mcmc = mcmc.pars)
 
 #plot the raw and reordered means of the K=2 normal mixture components for each method
-par(mfrow = c(2,3))
+par(mfrow = c(2,4))
 #raw MCMC output for the means (with label switching)
 matplot(mcmc.pars[,,1],type="l",
 xlab="iteration",main="Raw MCMC output",ylab = "means")
@@ -129,6 +149,10 @@ matplot(permute.mcmc(mcmc.pars,ls$permutations$"PRA")$output[,,1],type="l",
 xlab="iteration",main="PRA",ylab = "means")
 matplot(permute.mcmc(mcmc.pars,ls$permutations$"STEPHENS")$output[,,1],type="l",
 xlab="iteration",main="STEPHENS",ylab = "means")
+matplot(permute.mcmc(mcmc.pars,ls$permutations$"AIC")$output[,,1],type="l",
+xlab="iteration",main="AIC",ylab = "means")
+matplot(permute.mcmc(mcmc.pars,ls$permutations$"DATA-BASED")$output[,,1],type="l",
+xlab="iteration",main="DATA-BASED",ylab = "means")
 
 #######################################################
 # if the useR wants to apply the SJW algorithm as well:
@@ -154,13 +178,10 @@ complete.normal.loglikelihood<-function(x,z,pars){
 
 # and then run (after removing all #):
 #ls<-label.switching(method=c("ECR","ECR-ITERATIVE-1","ECR-ITERATIVE-2",
-#"PRA","STEPHENS","SJW"),zpivot=z[c(mapindex,mapindex.non),],z = z,
+#"PRA","STEPHENS","SJW","AIC","DATA-BASED"),
+#zpivot=z[c(mapindex,mapindex.non),],z = z,
 #K = K,prapivot = mcmc.pars[mapindex,,],p=p,
 #complete = complete.normal.loglikelihood,mcmc.pars,
 #data = x)
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

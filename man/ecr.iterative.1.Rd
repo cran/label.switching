@@ -1,15 +1,13 @@
 \name{ecr.iterative.1}
 \alias{ecr.iterative.1}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 ECR algorithm (iterative version 1)
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This function applies the first iterative version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010, Rodriguez and Walker, 2012). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. The difference with the default version of ECR algorithm is that no pivot is required and the method is iterative, until a fixed pivot has been found.   
+This function applies the first iterative version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010, Rodriguez and Walker, 2012). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. The difference with the default version of ECR algorithm is that no pivot is required and the method is iterative, until a fixed pivot has been found.
 }
 \usage{
-ecr.iterative.1(z, K, opt_init)
+ecr.iterative.1(z, K, opt_init, threshold, maxiter)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,31 +18,29 @@ ecr.iterative.1(z, K, opt_init)
   \item{opt_init}{
 An (optional) \eqn{m\times K} array of permutations to initialize the algorithm. The identity permutation is used if it is not specified.
 }
+  \item{threshold}{
+An (optional) positive number controlling the convergence criterion. Default value: 1e-6.
+}
+  \item{maxiter}{
+An (optional) integer controlling the max number of iterations. Default value: 100.
+}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
 \item{iterations }{integer denoting the number of iterations until convergence}
+\item{status }{returns the exit status}
 }
 \references{
-%% ~put references to the literature/web site here ~
 Papastamoulis P. and Iliopoulos G. (2010). An artificial allocations based solution to the label switching problem in Bayesian analysis of mixtures of distributions. Journal of Computational and Graphical Statistics, 19: 313-331.
 
-Rodriguez C.E. and Walker S. (2012). Label Switching in Bayesian Mixture Models: Deterministic relabeling strategies. Journal of Computational and Graphical Statistics. DOI:10.1080/10618600.2012.735624
+Rodriguez C.E. and Walker S. (2014). Label Switching in Bayesian Mixture Models: Deterministic relabeling strategies. Journal of Computational and Graphical Statistics. 23:1, 25-45
 }
 \author{
 Panagiotis Papastamoulis
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{permute.mcmc}}, \code{\link{label.switching}}, \code{\link{ecr}}, \code{\link{ecr.iterative.2}} 
+\code{\link{permute.mcmc}}, \code{\link{label.switching}}, \code{\link{ecr}}, \code{\link{ecr.iterative.2}}
 }
 \examples{
 #load a toy example: MCMC output consists of the random beta model

@@ -22,15 +22,9 @@ pra(mcmc.pars, pivot)
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 The positive integer \eqn{J} denotes the number of different parameter types of the model. For example, in a univariate normal mixture model there are \eqn{J = 3} different types: means, variances and weights. In a Poisson mixture there are \eqn{J=2} types: means and weights.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
 }
 \references{
@@ -42,15 +36,7 @@ Marin, J.M. and Robert, C.P. (2007). Bayesian Core: A Practical Approach to Comp
 \author{
 Panagiotis Papastamoulis
 }
-\note{
-%%  ~~further notes~~
-This algorithm is very fast for small number of components. It is not suggested for large number of components due to the calculation of \eqn{K!} distances for each MCMC sample.
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 \code{\link{permute.mcmc}}, \code{\link{label.switching}}
 }
 \examples{
@@ -75,9 +61,5 @@ reordered.mcmc<-permute.mcmc(mcmc.pars,run$permutations)
 # reordered.mcmc[,,1]: reordered means of the two components
 # reordered.mcmc[,,2]: reordered variances of the components
 # reordered.mcmc[,,3]: reordered weights 
-
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

@@ -2,48 +2,43 @@
 \alias{stephens}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
 Stephens' algorithm
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Stephens (2000) developed a relabelling algorithm that makes the permuted sample points to agree as much as possible on the \eqn{n\times K} matrix of classification probabilities, using the Kullback-Leibler divergence. The algorithm's input is the matrix of allocation probabilities for each MCMC iteration.
 }
 \usage{
-stephens(p)
+stephens(p, threshold, maxiter)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{p}{
-%%     ~~Describe \code{p} here~~
 \eqn{m\times n \times K} dimensional array of allocation probabilities of the \eqn{n} observations among the \eqn{K} mixture components, for each iteration \eqn{t = 1,\ldots,m} of the MCMC algorithm.
+}
+  \item{threshold}{
+An (optional) positive number controlling the convergence criterion. Default value: 1e-6.
+}
+  \item{maxiter}{
+An (optional) integer controlling the max number of iterations. Default value: 100.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 For a given MCMC iteration \eqn{t=1,\ldots,m}, let \eqn{w_k^{(t)}} and \eqn{\theta_k^{(t)}}, \eqn{k=1,\ldots,K} denote the simulated mixture weights and component specific parameters respectively. Then, the \eqn{(t,i,k)} element of \code{p} corresponds to the conditional probability that observation \eqn{i=1,\ldots,n} belongs to component \eqn{k} and is proportional to \eqn{p_{tik} \propto w_k^{(t)} f(x_i|\theta_k^{(t)}), k=1,\ldots,K}, where \eqn{f(x_i|\theta_k)} denotes the density of component \eqn{k}. This means that:
 \deqn{p_{tik} = \frac{w_k^{(t)} f(x_i|\theta_k^{(t)})}{w_1^{(t)} f(x_i|\theta_1^{(t)})+\ldots + w_K^{(t)} f(x_i|\theta_K^{(t)})}.}
 In case of hidden Markov models, the probabilities \eqn{w_k} should be replaced with the proper left (normalized) eigenvector of the state-transition matrix.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
 \item{iterations }{integer denoting the number of iterations until convergence}
+\item{status }{returns the exit status}
 }
 \references{
-%% ~put references to the literature/web site here ~
 Stephens, M. (2000). Dealing with label Switching in mixture models. Journal of the Royal Statistical Society Series B, 62, 795-809.
 }
 \author{
-%%  ~~who you are~~
 Panagiotis Papastamoulis
 }
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 \code{\link{permute.mcmc}}, \code{\link{label.switching}}
 }
 \examples{
@@ -67,7 +62,4 @@ reordered.mcmc<-permute.mcmc(mcmc.pars,run$permutations)
 # reordered.mcmc[,,2]: reordered variances
 # reordered.mcmc[,,3]: reordered weights
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

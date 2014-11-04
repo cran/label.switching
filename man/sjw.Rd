@@ -2,14 +2,13 @@
 \alias{sjw}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
 Probabilistic relabelling algorithm
 }
 \description{
-Function to apply the probabilistic relabelling strategy of Sperrin et al (2010).
+Function to apply the probabilistic relabelling strategy of Sperrin et al (2010). The concept here is to treat the MCMC output as observed data, while the unknown permutations need to be applied to each mcmc data point is treated as unobserved data with associated uncertainty. Then, an EM-type algorithm estimates the weights for each permutation per MCMC data point.
 }
 \usage{
-sjw(mcmc.pars, z, complete, x, init)
+sjw(mcmc.pars, z, complete, x, init, threshold, maxiter)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,9 +32,14 @@ function that returns the complete log-likelihood of the mixture model.
 %%     ~~Describe \code{init} here~~
 An (optional) index pointing at the MCMC iteration whose parameters will initialize the algorithm. If it is less or equal to zero, the overall MCMC mean will be used for initialization. 
 }
+  \item{threshold}{
+An (optional) positive number controlling the convergence criterion. Default value: 1e-6.
+}
+  \item{maxiter}{
+An (optional) integer controlling the max number of iterations. Default value: 100.
+}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 Let \eqn{x=(x_1,\ldots,x_n)} denote the observed data and \eqn{\boldsymbol{w},\boldsymbol{\theta}} denote the mixture weights and component specific parameters, respectively. Assume that \eqn{K} is the the number of components. Then,
 \deqn{L(\boldsymbol{w},\boldsymbol{\theta}|\boldsymbol{x})=\prod_{i=1}^{n}\sum_{k=1}^{K}w_k f_k(x_i|\theta_k),} 
 \eqn{i=1,\ldots,n} is the observed likelihood of the mixture model. Given the latent allocation variables \eqn{\boldsymbol{z}=(z_1,\ldots,z_n)}, the complete likelihood of the model is defined as: 
@@ -43,31 +47,20 @@ Let \eqn{x=(x_1,\ldots,x_n)} denote the observed data and \eqn{\boldsymbol{w},\b
 Then, \code{complete} corresponds to the log of \eqn{L_c} and should take as input the following: a vector of \eqn{n} allocations, the observed data and the parameters of the model as a \eqn{K\times J} array where \eqn{J} corresponds to the different parameter types of the model. See the example for an implementation at a univariate normal mixture.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
 \item{iterations }{integer denoting the number of iterations until convergence}
+\item{status }{returns the exit status}
 }
 \references{
-%% ~put references to the literature/web site here ~
 Sperrin M, Jaki T and Wit E (2010). Probabilistic relabelling strategies for the label switching problem in Bayesian mixture models.  Statistics and Computing, 20(3), 357-366.
 }
 \author{
-%%  ~~who you are~~
 Panagiotis Papastamoulis
 }
 \note{
-%%  ~~further notes~~
 This algorithm is not suggested for large number of components due to the computational overload: \eqn{K!} permutation probabilities are computed at each MCMC iteration. Moreover, the useR should carefully provide the complete log-likelihood function of the model as input to the algorithm and this makes its use quite complicated.
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 \code{\link{permute.mcmc}}, \code{\link{label.switching}}
 }
 \examples{
@@ -110,14 +103,11 @@ complete.normal.loglikelihood<-function(x,z,pars){
 
 #run the algorithm:
 run<-sjw(mcmc = mcmc.pars,z = z, 
-complete = complete.normal.loglikelihood,x = x, init=0)
+complete = complete.normal.loglikelihood,x = x, init=0,threshold = 1e-4)
 # apply the permutations returned by typing:
 reordered.mcmc<-permute.mcmc(mcmc.pars,run$permutations)
 # reordered.mcmc[,,1]: reordered means of the two components
 # reordered.mcmc[,,2]: reordered variances 
 # reordered.mcmc[,,3]: reordered weights
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

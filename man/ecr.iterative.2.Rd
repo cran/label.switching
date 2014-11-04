@@ -2,17 +2,14 @@
 \alias{ecr.iterative.2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
 ECR algorithm (iterative version 2)
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-This function applies the second iterative version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010, Rodriguez and Walker, 2012). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. In this version the \eqn{m\times n \times K} of allocation probabilities should be given as input as well.   
+This function applies the second iterative version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010, Rodriguez and Walker, 2012). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. In this version the \eqn{m\times n \times K} of allocation probabilities should be given as input as well.
 }
 \usage{
-ecr.iterative.2(z, K, p)
+ecr.iterative.2(z, K, p, threshold, maxiter)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{z}{\eqn{m\times n} integer array of the latent allocation vectors generated from an MCMC algorithm.
 %%     ~~Describe \code{z} here~~
@@ -23,34 +20,33 @@ ecr.iterative.2(z, K, p)
   \item{p}{\eqn{m\times n \times K} dimensional array of allocation probabilities of the \eqn{n} observations among the \eqn{K} mixture components, for each iteration \eqn{t = 1,\ldots,m} of the MCMC algorithm.
 %%     ~~Describe \code{p} here~~
 }
+  \item{threshold}{
+An (optional) positive number controlling the convergence criterion. Default value: 1e-6.
+}
+  \item{maxiter}{
+An (optional) integer controlling the max number of iterations. Default value: 100.
+}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 For a given MCMC iteration \eqn{t=1,\ldots,m}, let \eqn{w_k^{(t)}} and \eqn{\theta_k^{(t)}}, \eqn{k=1,\ldots,K} denote the simulated mixture weights and component specific parameters respectively. Then, the \eqn{(t,i,k)} element of \code{p} corresponds to the conditional probability that observation \eqn{i=1,\ldots,n} belongs to component \eqn{k} and is proportional to \eqn{p_{tik} \propto w_k^{(t)} f(x_i|\theta_k^{(t)}), k=1,\ldots,K}, where \eqn{f(x_i|\theta_k)} denotes the density of component \eqn{k}. This means that:
 \deqn{p_{tik} = \frac{w_k^{(t)} f(x_i|\theta_k^{(t)})}{w_1^{(t)} f(x_i|\theta_1^{(t)})+\ldots + w_K^{(t)} f(x_i|\theta_K^{(t)})}.}
 In case of hidden Markov models, the probabilities \eqn{w_k} should be replaced with the proper left (normalized) eigenvector of the state-transition matrix.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
 \item{iterations }{integer denoting the number of iterations until convergence}
+\item{status }{returns the exit status}
 }
 \references{
-%% ~put references to the literature/web site here ~
 Papastamoulis P. and Iliopoulos G. (2010). An artificial allocations based solution to the label switching problem in Bayesian analysis of mixtures of distributions. Journal of Computational and Graphical Statistics, 19: 313-331.
 
-Rodriguez C.E. and Walker S. (2012). Label Switching in Bayesian Mixture Models: Deterministic relabeling strategies. Journal of Computational and Graphical Statistics. DOI:10.1080/10618600.2012.735624
+Rodriguez C.E. and Walker S. (2014). Label Switching in Bayesian Mixture Models: Deterministic relabeling strategies. Journal of Computational and Graphical Statistics. 23:1, 25-45
+
 }
 \author{
-%%  ~~who you are~~
 Panagiotis Papastamoulis
 }
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 \code{\link{permute.mcmc}}, \code{\link{label.switching}}, \code{\link{ecr}}, \code{\link{ecr.iterative.1}}, \code{\link{stephens}} 
 }
 \examples{

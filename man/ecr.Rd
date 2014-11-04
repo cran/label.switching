@@ -5,7 +5,7 @@
 ECR algorithm (default version)
 }
 \description{
-This function applies the standard version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. The practical implementation of this idea is to reorder the output so that all simulated allocation vectors (\code{z}) are as similar as possible with a pivot allocation vector (\code{zpivot}). The useR has to specify this pivot allocation vector as a good allocation of the observations among the mixture components. Some typical choices are the allocations that correspond to the complete or non-complete MAP estimate.  
+This function applies the standard version of Equivalence Classes Representatives (ECR) algorithm (Papastamoulis and Iliopoulos, 2010). The set of all allocation variables is partitioned into equivalence classes and exactly one representative is chosen from each class. The practical implementation of this idea is to reorder the output so that all simulated allocation vectors (\code{z}) are as similar as possible with a pivot allocation vector (\code{zpivot}).  
 }
 \usage{
 ecr(zpivot, z, K)
@@ -24,16 +24,10 @@ the number of mixture components (at least equal to 2).
 }
 }
 \details{
-\code{zpivot} should be chosen as an allocation vector that corresponds to a high-posterior density area, or in general as an allocation that is considered as a good allocation of the observations among the \eqn{K} components.
+\code{zpivot} should be chosen as an allocation vector that corresponds to a high-posterior density area, or in general as an allocation that is considered as a good allocation of the observations among the \eqn{K} components. The useR has to specify this pivot allocation vector as a good allocation of the observations among the mixture components. Some typical choices are the allocations that correspond to the complete or non-complete MAP/ML estimates.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 \item{permutations }{\eqn{m\times K} dimensional array of permutations}
-
 }
 \references{
 Papastamoulis P. and Iliopoulos G. (2010). An artificial allocations based solution to the label switching problem in Bayesian analysis of mixtures of distributions. Journal of Computational and Graphical Statistics, 19: 313-331.
@@ -41,8 +35,8 @@ Papastamoulis P. and Iliopoulos G. (2010). An artificial allocations based solut
 \author{
 Panagiotis Papastamoulis
 }
+
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 \code{\link{permute.mcmc}}, \code{\link{label.switching}}, \code{\link{ecr.iterative.1}}, \code{\link{ecr.iterative.2}} 
 }
 \examples{

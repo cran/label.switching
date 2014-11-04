@@ -38,6 +38,7 @@ number of mixture components
 %% ...
 \item{similarity }{\eqn{(f+1) K\times (f+1)} matrix containing the similarity coefficient of the resulting clusters.}
 \item{clusters }{\eqn{f\times n} array of single best clusterings, relabelled in order to maximize their similarity with \code{pivot.clust}.}
+\item{permutations }{releaballed permutations.}
 }
 \author{
 %%  ~~who you are~~
