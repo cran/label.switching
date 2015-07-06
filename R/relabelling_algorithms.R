@@ -652,7 +652,10 @@ label.switching<-function(method, zpivot, z, K, prapivot, p, complete, mcmc, sjw
         }
     }
 if (missing(p) == FALSE){nCheck <- dim(p)[2]}
-if (missing(z) == FALSE){nCheck <- dim(z)[1]}
+if (missing(p) == FALSE){kCheck <- dim(p)[3]}
+if (missing(mcmc) == FALSE){kCheck <- dim(mcmc)[2]}
+
+
 if (missing(data) == FALSE){
 	if(is.null(dim(data))==TRUE){nCheck = length(data)}else{
 		nCheck <- dim(data)[1]
@@ -661,6 +664,11 @@ if (missing(data) == FALSE){
 if(missing(K)==TRUE){K = kCheck;
 cat(paste("    [WARNING]: K is not provided. According to input it is assumed that K = ",K,".",sep=""),'\n')
 }
+if(max(z) < K){
+cat(paste("    [WARNING]: max sampled latent allocation = ",max(z)," < ", "K = ",K,". This indicates that the MCMC sampler has not converged and/or the presence of redundant components.",sep=""),'\n')
+}
+
+
 ## checking input consistency
 if(missing(z)==FALSE){
 	if(m != dim(z)[1]){stop(cat(paste("    [ERROR]: MCMC iterations are not equal to dim(z)[1]."),'\n'))}
