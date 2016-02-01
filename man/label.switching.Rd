@@ -95,6 +95,11 @@ Panagiotis Papastamoulis
 \note{
 If the ground truth is not given, all methods are reordered using the estimated single best clustering of the first provided method. The methods \code{\link{sjw}} and \code{\link{pra}} are not suggested for large number of components. Also note that \code{\link{sjw}} might be quite slow even for small number of components. In this case try adjusting \code{thrSJW} or \code{maxSJW} to smaller values the default ones.
 }
+\references{
+Papastamoulis P. (2016). label.switching: An R Package for Dealing with the Label Switching Problem in MCMC Outputs. Journal of Statistical Software, Code Snippets, 69(1): 1-24.
+
+}
+
 
 \seealso{
 \code{\link{ecr}}, \code{\link{ecr.iterative.1}}, \code{\link{ecr.iterative.2}}, \code{\link{stephens}}, \code{\link{pra}}, \code{\link{sjw}}, \code{\link{dataBased}}, \code{\link{aic}}
