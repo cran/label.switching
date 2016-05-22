@@ -1,6 +1,6 @@
-159bd4e8131c563f444f16751cd4058c *DESCRIPTION
+e8d31c10fcc1273e87ee56adb3efb22b *DESCRIPTION
 dfe9d9adb938e03d80182f16dc8007d7 *NAMESPACE
-67bd10e9d20d939962653eeaed28e5ac *R/relabelling_algorithms.R
+34ee3466838d6607d4b7d5587bec3368 *R/relabelling_algorithms.R
 ad7d701ed2e6e08d1c6b2175a8ba244c *data/fetal-lamb.RData
 5faf2c7587601de707486a7ad4095981 *data/mcmc_output.RData
 d3e8a92c344355b50c57eda6af259e6c *inst/CITATION

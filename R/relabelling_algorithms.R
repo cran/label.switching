@@ -704,6 +704,8 @@ if(missing(zpivot)==FALSE){
 	}else{
 		if(nCheck != dim(zpivot)[2]){stop(cat(paste("    [ERROR]: Number of observations is not equal to dim(zpivot)[2]."),'\n'))}
 	}
+}else{
+	zpivot = array(1) # this is just to debug the input checking in case it is missing.
 }
 if(missing(prapivot)==FALSE){
 	if(kCheck != dim(prapivot)[1]){stop(cat(paste("    [ERROR]: K is not equal to dim(prapivot)[1]."),'\n'))}
