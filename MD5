@@ -1,4 +1,4 @@
-e8d31c10fcc1273e87ee56adb3efb22b *DESCRIPTION
+8fdda8630467367d4e7bc9f458598987 *DESCRIPTION
 dfe9d9adb938e03d80182f16dc8007d7 *NAMESPACE
 34ee3466838d6607d4b7d5587bec3368 *R/relabelling_algorithms.R
 ad7d701ed2e6e08d1c6b2175a8ba244c *data/fetal-lamb.RData
@@ -11,7 +11,7 @@ decf1f20e97caa1c5d7fb782580cd217 *man/dataBased.Rd
 23e7eda3280bb233e6ccb1073ac1b286 *man/ecr.Rd
 7fec7f11d28414a588a20136bbaca5c9 *man/ecr.iterative.1.Rd
 61098189377f94f5cae5dd7652a02967 *man/ecr.iterative.2.Rd
-1c15073349073e2ba39ff6e9f8b8542a *man/label.switching-package.Rd
+4dd2fee4bf9c15413845dcef991eece8 *man/label.switching-package.Rd
 715b2d2a6d32080c7be7c400f770a6c4 *man/label.switching.Rd
 e4ef0aac60d235ba00e69e4102b70134 *man/lamb.Rd
 25b7b559c44c6c04b3f0d1c2832ae41f *man/permute.mcmc.Rd
