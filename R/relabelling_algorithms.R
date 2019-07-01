@@ -308,7 +308,7 @@ while((criterion>threshold)&&(t<maxiter)){
 		}
 		perm[iter,]<-order(perm[iter,])
 	}
-	current<-cost.function<-sum(cost.matrix)
+	current<-cost.function<-sum(cost.matrix*matr)
 	criterion<-abs(previous - current)
 	previous<-current
 	#if(t>1){print(paste("iteration ", t,", criterion =",criterion))}

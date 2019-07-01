@@ -105,8 +105,8 @@ Papastamoulis P. (2016). label.switching: An R Package for Dealing with the Labe
 \code{\link{ecr}}, \code{\link{ecr.iterative.1}}, \code{\link{ecr.iterative.2}}, \code{\link{stephens}}, \code{\link{pra}}, \code{\link{sjw}}, \code{\link{dataBased}}, \code{\link{aic}}
 }
 \examples{
-# We will apply four methods:
-# ECR, ECR-ITERATIVE-1, PRA, AIC, STEPHENS and DATA-BASED.
+# We will apply the following methods:
+# ECR, ECR-ITERATIVE-1, PRA, AIC and DATA-BASED.
 # default ECR will use two different pivots.
 
 #load a toy example: MCMC output consists of the random beta model
@@ -122,21 +122,20 @@ mcmc.pars<-data_list$"mcmc.pars"
 # We will use two pivots for default ECR algorithm:
 # the first one corresponds to iteration \code{mapindex} (complete MAP)
 # the second one corresponds to iteration \code{mapindex.non} (observed MAP)
-# The array \code{p} corresponds to the the allocation probabilities 
+
 z<-data_list$"z"
 K<-data_list$"K"
-p<-data_list$"p"
 x<-data_list$"x"
 mapindex<-data_list$"mapindex"
 mapindex.non<-data_list$"mapindex.non"
 # The PRA method will use as pivot the iteration that corresponds to
-# the non-complete MAP estimate (mapindex). 
+# the observed MAP estimate (mapindex). 
 
-#Apply the six methods by typing:
+#Apply (a subset of the available) methods by typing:
 
-ls<-label.switching(method=c("ECR","ECR-ITERATIVE-1","PRA","STEPHENS","AIC","DATA-BASED"),
+ls<-label.switching(method=c("ECR","ECR-ITERATIVE-1","PRA", "AIC","DATA-BASED"),
 zpivot=z[c(mapindex,mapindex.non),],z = z,K = K, data = x,
-prapivot = mcmc.pars[mapindex,,],p=p,mcmc = mcmc.pars)
+prapivot = mcmc.pars[mapindex,,],mcmc = mcmc.pars)
 
 #plot the raw and reordered means of the K=2 normal mixture components for each method
 par(mfrow = c(2,4))
@@ -152,15 +151,16 @@ matplot(permute.mcmc(mcmc.pars,ls$permutations$"ECR-ITERATIVE-1")$output[,,1],
 type="l",xlab="iteration",main="ECR-iterative-1",ylab = "means")
 matplot(permute.mcmc(mcmc.pars,ls$permutations$"PRA")$output[,,1],type="l",
 xlab="iteration",main="PRA",ylab = "means")
-matplot(permute.mcmc(mcmc.pars,ls$permutations$"STEPHENS")$output[,,1],type="l",
-xlab="iteration",main="STEPHENS",ylab = "means")
 matplot(permute.mcmc(mcmc.pars,ls$permutations$"AIC")$output[,,1],type="l",
 xlab="iteration",main="AIC",ylab = "means")
 matplot(permute.mcmc(mcmc.pars,ls$permutations$"DATA-BASED")$output[,,1],type="l",
 xlab="iteration",main="DATA-BASED",ylab = "means")
 
 #######################################################
-# if the useR wants to apply the SJW algorithm as well:
+# if the useR wants to apply the STEPHENS and SJW algorithm as well:
+# The STEPHENS method requires the classification probabilities
+p<-data_list$"p"
+
 # The SJW method needs to define the complete log-likelihood of the
 # model. For the univariate normal mixture, this is done as follows:
 

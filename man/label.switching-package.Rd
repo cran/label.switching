@@ -11,8 +11,8 @@ This package can be used to reorder MCMC outputs of parameters of mixture models
 \tabular{ll}{
 Package: \tab label.switching\cr
 Type: \tab Package\cr
-Version: \tab 1.7\cr
-Date: \tab 2018-18-05\cr
+Version: \tab 1.8\cr
+Date: \tab 2019-07-01\cr
 License: \tab GPL-2\cr
 }
 This is NOT a package to simulate MCMC samples from the posterior distribution of mixture models. MCMC output and related information serves as input to the available methods. There are eight functions that can be used to post-process the MCMC output:
